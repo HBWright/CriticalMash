@@ -462,7 +462,14 @@ PrefabInstance:
       value: 'hangar '
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: -4347956324793812166, guid: 1c063222dbe316c40a8cc4c6a5a6a686, type: 3}
+    - {fileID: -4905006303552245111, guid: 1c063222dbe316c40a8cc4c6a5a6a686, type: 3}
+    - {fileID: -6213518880339895318, guid: 1c063222dbe316c40a8cc4c6a5a6a686, type: 3}
+    - {fileID: -690830625273242541, guid: 1c063222dbe316c40a8cc4c6a5a6a686, type: 3}
+    - {fileID: 5951661943921103212, guid: 1c063222dbe316c40a8cc4c6a5a6a686, type: 3}
+    - {fileID: 6124757571964776193, guid: 1c063222dbe316c40a8cc4c6a5a6a686, type: 3}
+    - {fileID: -3183505245362905052, guid: 1c063222dbe316c40a8cc4c6a5a6a686, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c063222dbe316c40a8cc4c6a5a6a686, type: 3}
