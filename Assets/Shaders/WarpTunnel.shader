@@ -100,6 +100,46 @@ Shader "Custom/Hyperwarp"
             
             fixed4 frag (v2f i) : SV_Target
             {
+                // Check if we're in the main VR player camera ONLY
+                bool isMainVRCamera = false;
+                
+                #if UNITY_EDITOR
+                // In editor, check multiple conditions to ensure it's the main camera
+                // Scene view cameras have very different projection matrices
+                if (unity_CameraProjection[1][1] > 0.5 && unity_CameraProjection[1][1] < 10.0)
+                {
+                    // Additional check: main camera usually has near plane around 0.1-1.0
+                    if (unity_CameraProjection[2][3] < -0.05 && unity_CameraProjection[2][3] > -5.0)
+                    {
+                        // Check if this looks like a VR camera (stereo rendering)
+                        // VR cameras often have specific projection characteristics
+                        isMainVRCamera = true;
+                    }
+                }
+                #else
+                // In build, we can be more permissive since only game cameras will render
+                // But still check for reasonable projection values
+                if (unity_CameraProjection[1][1] > 0.1 && unity_CameraProjection[1][1] < 50.0)
+                {
+                    isMainVRCamera = true;
+                }
+                #endif
+                
+                // EXTRA SAFETY: Check camera position isn't at extreme values (editor cameras often are)
+                float3 cameraWorldPos = float3(UNITY_MATRIX_V[0][3], UNITY_MATRIX_V[1][3], UNITY_MATRIX_V[2][3]);
+                if (length(cameraWorldPos) > 1000.0) // If camera is very far away, probably not main camera
+                {
+                    isMainVRCamera = false;
+                }
+                
+                // If not main VR camera, return transparent/background color
+                if (!isMainVRCamera)
+                {
+                    return float4(_BackgroundColor.rgb, 0.0); // Make transparent for non-VR cameras
+                }
+                
+                // === WARP TUNNEL EFFECTS (Only for main VR camera) ===
+                
                 // Convert UV to centered coordinates (-1 to 1)
                 float2 uv = (i.uv - 0.5) * 2.0;
                 
