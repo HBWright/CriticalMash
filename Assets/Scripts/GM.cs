@@ -1,35 +1,116 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
-public class TimerDisplay : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
-    public TextMeshProUGUI timerText; 
-    public float timeRemaining = 60f; // start time
-    public bool countDown = true;     
-    private bool timerRunning = true;
+    [Header("UI Elements")]
+    public Button startButton;
+    public GameObject buttonToHide;
+    public GameObject starShips;
+    public TextMeshProUGUI timerText;
+
+    [Header("Timer Settings")]
+    public float timeRemaining = 60f;
+    public bool countDown = true;
+
+    private bool timerRunning = false;
+    private bool timerEnded = false;
+
+    void Start()
+    {
+        if (startButton != null)
+            startButton.onClick.AddListener(OnStartButtonClicked);
+
+        if (timerText != null)
+            timerText.text = "";
+    }
+
+    private bool reached50 = false;
+    private bool reached46 = false;
+
 
     void Update()
     {
         if (!timerRunning) return;
 
-        if (countDown) // ngl chat wrote this timer its 2am bro
+        if (countDown)
         {
             timeRemaining -= Time.deltaTime;
+
+            // Trigger once when timer first reaches 46 or below
+            if (!reached50 && timeRemaining <= 50f)
+            {
+                reached50 = true;
+                OnTimerReached50();
+            }
+
+            if (!reached46 && timeRemaining <= 46f)
+            {
+                reached46 = true;
+                OnTimerReached46();
+            }
+
+            if (reached46)
+            {
+                UpdateTimerText();
+            }
+
             if (timeRemaining <= 0)
             {
                 timeRemaining = 0;
                 timerRunning = false;
+
+                if (!timerEnded)
+                {
+                    timerEnded = true;
+                    OnTimerEnd();
+                }
             }
         }
         else
         {
             timeRemaining += Time.deltaTime;
         }
+    }
 
-        // seconds.milliseconds
+    private void UpdateTimerText()
+{
+    int seconds = Mathf.FloorToInt(timeRemaining);
+    int milliseconds = Mathf.FloorToInt((timeRemaining - seconds) * 1000);
+
+    if (timerText != null)
+        timerText.text = $"{seconds:00}.{milliseconds:000}";
+}
+
+    private void OnStartButtonClicked()
+    {
+        if (buttonToHide != null)
+            buttonToHide.SetActive(false);
+
+        timerRunning = true;
+        timerEnded = false;
+    }
+
+    private void OnTimerEnd()
+    {
+        Debug.Log("Time finished");
+        // I'll put an explosion animation here
+    }
+
+    private void OnTimerReached50()
+    {
+        starShips.SetActive(true);
+    }
+
+    private void OnTimerReached46()
+    {
         int seconds = Mathf.FloorToInt(timeRemaining);
         int milliseconds = Mathf.FloorToInt((timeRemaining - seconds) * 1000);
 
-        timerText.text = $"{seconds:00}.{milliseconds:000}";
+        if (timerText != null)
+            timerText.text = $"{seconds:00}.{milliseconds:000}";
+
+        starShips.SetActive(true);
     }
 }
