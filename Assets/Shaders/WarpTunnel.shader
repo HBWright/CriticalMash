@@ -5,21 +5,21 @@ Shader "Custom/Hyperwarp"
         _Speed ("Warp Speed", Range(0.1, 10.0)) = 2.0
         _BackgroundColor ("Background Color", Color) = (0.0, 0.0, 0.0, 1)
         
-        // Light beam properties
-        _BeamCount ("Light Beam Count", Range(20, 200)) = 80
-        _BeamBrightness ("Beam Brightness", Range(0.1, 5.0)) = 2.0
+        // Light beam properties - ULTRA AGGRESSIVE QUEST 2 OPTIMIZATION (90+ FPS TARGET)
+        _BeamCount ("Light Beam Count", Range(4, 8)) = 6
+        _BeamBrightness ("Beam Brightness", Range(0.1, 2.5)) = 2.2
         _BeamColor1 ("Beam Color 1", Color) = (1.0, 1.0, 1.0, 1) // White
-        _BeamColor2 ("Beam Color 2", Color) = (0.9, 0.9, 1.0, 1) // Slightly blue-white
-        _BeamThickness ("Beam Thickness", Range(0.001, 0.05)) = 0.01
-        _BeamLength ("Beam Length", Range(0.1, 2.0)) = 1.0
-        _CenterSize ("Center Hole Size", Range(0.0, 0.3)) = 0.1
+        _BeamColor2 ("Beam Color 2", Color) = (0.8, 0.9, 1.0, 1) // Blue-white
+        _BeamThickness ("Beam Thickness", Range(0.012, 0.03)) = 0.02
+        _BeamLength ("Beam Length", Range(0.6, 1.0)) = 0.8
+        _CenterSize ("Center Hole Size", Range(0.08, 0.15)) = 0.1
         
-        // Star properties
-        _StarCount ("Star Count", Range(50, 500)) = 200
-        _StarBrightness ("Star Brightness", Range(0.1, 3.0)) = 1.5
+        // Star properties - ULTRA AGGRESSIVE QUEST 2 OPTIMIZATION (90+ FPS TARGET)
+        _StarCount ("Star Count", Range(4, 10)) = 6
+        _StarBrightness ("Star Brightness", Range(0.1, 2.0)) = 1.5
         _StarColor ("Star Color", Color) = (1,1,1,1)
-        _StarSpeed ("Star Speed", Range(0.1, 2.0)) = 0.5
-        _StarSize ("Star Size", Range(0.005, 0.03)) = 0.01
+        _StarSpeed ("Star Speed", Range(0.4, 1.0)) = 0.7
+        _StarSize ("Star Size", Range(0.012, 0.03)) = 0.02
     }
     
     SubShader
@@ -70,24 +70,18 @@ Shader "Custom/Hyperwarp"
             float _StarSpeed;
             float _StarSize;
             
-            // Hash function for procedural randomness
+            // ULTRA-FAST hash function for Quest 2
             float hash(float n)
             {
-                return frac(sin(n) * 43758.5453);
+                return frac(sin(n) * 1234.56); // Faster calculation
             }
             
-            float2 hash2(float n)
+            // Ultra-simplified line distance for Quest 2
+            float lineDistance(float2 p, float2 a, float2 b)
             {
-                return frac(sin(float2(n, n + 1.0)) * float2(43758.5453, 22578.1459));
-            }
-            
-            // Distance from point to line segment
-            float distanceToLine(float2 p, float2 start, float2 end)
-            {
-                float2 pa = p - start;
-                float2 ba = end - start;
-                float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-                return length(pa - ba * h);
+                float2 ba = b - a;
+                float t = saturate(dot(p - a, ba) / dot(ba, ba));
+                return length(p - a - ba * t);
             }
             
             v2f vert (appdata v)
@@ -149,148 +143,119 @@ Shader "Custom/Hyperwarp"
                 
                 float4 color = _BackgroundColor;
                 
-                // === LIGHT BEAMS ===
+                // === ULTRA AGGRESSIVE QUEST 2 LIGHT BEAMS - 90+ FPS TARGET ===
                 float beamIntensity = 0.0;
                 
-                for(int j = 0; j < _BeamCount; j++)
+                // Hard limit beams to 6 for maximum Quest 2 performance
+                int maxBeams = min((int)_BeamCount, 6);
+                
+                [unroll(6)] // Ultra-small unroll for Quest 2
+                for(int j = 0; j < maxBeams && j < 6; j++)
                 {
                     float beamIndex = float(j);
                     
-                    // Random angle for each beam (not evenly spaced)
-                    float beamAngle = hash(beamIndex * 234.56) * 6.28318;
+                    // Ultra-fast hash with more variation
+                    float hash1 = frac(sin(beamIndex * 12.34 + time * 0.5) * 1234.56);
+                    float hash2 = frac(sin(beamIndex * 56.78 + time * 0.3) * 1234.56);
+                    float hash3 = frac(sin(beamIndex * 91.23 + time * 0.7) * 1234.56);
                     
-                    // Random radial offset for beam placement
-                    float beamOffset = hash(beamIndex * 567.89) * 0.3 + 0.1;
-                    
-                    // Calculate beam direction
+                    // More randomized beam positioning
+                    float beamAngle = hash1 * 6.28318 + time * 0.1;
                     float2 beamDir = float2(cos(beamAngle), sin(beamAngle));
                     
-                    // Beam animation - moves from center outward to far, then resets (REVERSED)
-                    float beamProgress = frac(hash(beamIndex * 789.12) + time * _Speed * 0.3);
+                    // Faster, more varied beam animation
+                    float beamProgress = frac(hash2 + time * _Speed * 0.25);
+                    float beamStart = _CenterSize + (hash3 * 0.3 + beamProgress * 0.2);
+                    float beamEnd = beamStart + _BeamLength * (0.5 + hash3 * 0.4);
                     
-                    // Map progress to beam position (starts at center, moves outward)
-                    float maxLength = 2.0;
-                    float beamStart = _CenterSize + beamProgress * 0.5; // Tail of the beam
-                    float beamEnd = _CenterSize + beamProgress * maxLength; // Head of the beam
+                    // Create beam line
+                    float2 beamStartPos = beamDir * beamStart;
+                    float2 beamEndPos = beamDir * beamEnd;
                     
-                    // Only show beam if it's within visible range
-                    if(beamStart < maxLength && beamEnd > _CenterSize)
-                    {
-                        // Beam extends from center toward outer edge
-                        float2 beamStartPos = beamDir * beamStart;
-                        float2 beamEndPos = beamDir * beamEnd;
-                        
-                        // Calculate distance to beam line segment
-                        float lineDistance = distanceToLine(uv, beamStartPos, beamEndPos);
-                        
-                        // Check if point is within the beam segment
-                        float pointDist = length(uv);
-                        float beamMask = step(beamStart, pointDist) * step(pointDist, beamEnd);
-                        
-                        // Create beam intensity
-                        float beam = exp(-lineDistance / _BeamThickness) * beamMask;
-                        
-                        // Fade beam as it moves away from center
-                        beam *= smoothstep(maxLength - 0.2, maxLength, beamEnd);
-                        
-                        // Brighten beam head (the leading edge moving outward)
-                        float headDistance = abs(pointDist - beamEnd);
-                        beam += exp(-headDistance / (_BeamThickness * 2.0)) * exp(-lineDistance / (_BeamThickness * 0.5)) * beamMask * 2.0;
-                        
-                        beamIntensity += beam;
-                    }
+                    // Ultra-simplified distance calculation with slight randomness
+                    float lineDist = lineDistance(uv, beamStartPos, beamEndPos);
+                    
+                    // Simple beam visibility with random thickness variation
+                    float pointDist = length(uv);
+                    float beamMask = step(beamStart, pointDist) * step(pointDist, beamEnd);
+                    
+                    // Ultra-simplified beam calculation with thickness variation
+                    float thicknessVariation = 0.8 + hash3 * 0.4;
+                    float beam = exp(-lineDist * 40.0 / (_BeamThickness * thicknessVariation)) * beamMask;
+                    
+                    // Minimal head glow
+                    float headGlow = exp(-abs(pointDist - beamEnd) * 10.0) * 0.2;
+                    beam += headGlow;
+                    
+                    beamIntensity += beam;
                 }
                 
-                // Color variation for beams
-                float colorMix = sin(time * 0.5 + angle * 2.0) * 0.5 + 0.5;
+                // Ultra-simple color variation for Quest 2
+                float colorMix = sin(time * 0.2 + angle * 0.5) * 0.5 + 0.5;
                 float4 beamColor = lerp(_BeamColor1, _BeamColor2, colorMix);
-                
-                // Apply beam color
                 color = lerp(color, beamColor, saturate(beamIntensity * _BeamBrightness));
                 
-                // === STARS ===
+                // === ULTRA AGGRESSIVE QUEST 2 STARS - 90+ FPS TARGET ===
                 float starIntensity = 0.0;
                 
-                for(int k = 0; k < _StarCount; k++)
+                // Hard limit stars to 6 for maximum Quest 2 performance
+                int maxStars = min((int)_StarCount, 6);
+                
+                [unroll(6)] // Ultra-small loop for Quest 2
+                for(int k = 0; k < maxStars && k < 6; k++)
                 {
                     float starIndex = float(k);
                     
-                    // Multiple hash values for maximum randomness
-                    float hash1 = hash(starIndex * 123.45);
-                    float hash2 = hash(starIndex * 678.90);
-                    float hash3 = hash(starIndex * 234.67);
-                    float hash4 = hash(starIndex * 890.12);
-                    float hash5 = hash(starIndex * 345.78);
+                    // Faster, more random star movement
+                    float hash1 = frac(sin(starIndex * 9.87 + time * 0.2) * 1234.56);
+                    float hash2 = frac(sin(starIndex * 43.21 + time * 0.4) * 1234.56);
+                    float hash3 = frac(sin(starIndex * 76.54 + time * 0.6) * 1234.56);
                     
-                    // Completely random angle (full 360 degrees)
-                    float starAngle = hash1 * 6.28318;
+                    // More varied star positioning with slight rotation
+                    float starAngle = hash1 * 6.28318 + time * 0.05;
+                    float starDistance = 0.4 + hash2 * 1.0;
                     
-                    // Much more varied distance from center with multiple random factors
-                    float baseDistance = 0.2 + hash2 * 3.0; // Base spread
-                    float distanceVariation = hash3 * 1.5; // Additional random variation
-                    float starDistance = baseDistance + distanceVariation;
+                    // Faster, more varied animation
+                    float starTime = frac(hash3 + time * _StarSpeed * 0.12);
+                    float starDepth = starTime * 2.2;
                     
-                    // Random depth with more variation
-                    float depthOffset = hash4 * 12.0; // Different starting points for each star
-                    float starDepth = frac(depthOffset + time * _StarSpeed * 0.2 * (0.5 + hash5 * 1.0)) * 6.0;
+                    // Simple position calculation
+                    float projectionFactor = 1.0 + starDepth * 0.2;
+                    float2 starPos = float2(cos(starAngle), sin(starAngle)) * starDistance * projectionFactor;
                     
-                    // Random projection factor variation
-                    float projectionVariation = 0.8 + hash3 * 0.4; // Each star projects slightly differently
-                    float projectionFactor = (1.0 + starDepth * 0.5) * projectionVariation;
+                    // Early exit for performance
+                    if(length(starPos) > 1.5 || starDepth > 2.0) continue;
                     
-                    // Apply random rotation offset to break up patterns
-                    float rotationOffset = hash4 * 6.28318;
-                    float finalAngle = starAngle + rotationOffset * 0.1;
+                    // Ultra-simplified star calculation
+                    float starDist = length(uv - starPos);
+                    float starSize = _StarSize * (0.8 + hash2 * 0.3);
+                    float star = exp(-starDist * 30.0 / starSize);
                     
-                    float2 starPos = float2(cos(finalAngle), sin(finalAngle)) * starDistance * projectionFactor;
+                    // Minimal twinkling
+                    float twinkle = 0.85 + 0.15 * sin(time + hash3 * 6.28);
+                    star *= twinkle;
                     
-                    // More lenient visibility check to show more stars
-                    if(length(starPos) < 4.0 && starDepth < 5.5)
-                    {
-                        // Distance to star
-                        float starDist = length(uv - starPos);
-                        
-                        // Random size variation for each star
-                        float sizeVariation = 0.7 + hash2 * 0.6; // Each star has different size
-                        float starSizeAdjusted = _StarSize * sizeVariation * (1.0 + (5.5 - starDepth) * 0.2);
-                        float star = exp(-starDist / starSizeAdjusted);
-                        
-                        // Random twinkling with different frequencies for each star
-                        float twinkleSpeed = 1.5 + hash5 * 2.0;
-                        float twinklePhase = hash3 * 6.28318;
-                        star *= 0.7 + 0.3 * sin(time * twinkleSpeed + twinklePhase);
-                        
-                        // Random brightness variation
-                        float brightnessVariation = 0.6 + hash4 * 0.8;
-                        star *= (1.0 - starDepth * 0.15) * brightnessVariation;
-                        
-                        starIntensity += star;
-                    }
+                    // Simple brightness
+                    float brightness = (1.0 - starDepth * 0.4);
+                    starIntensity += star * brightness;
                 }
                 
                 // Apply stars
                 color = lerp(color, _StarColor, saturate(starIntensity * _StarBrightness));
                 
-                // === CENTER GLOW & INFINITE TUNNEL ===
-                // Create bright center point that fades to infinity
-                float centerGlow = exp(-dist * 2.0) * 0.8;
+                // === ULTRA-MINIMAL CENTER EFFECTS - QUEST 2 MAXIMUM PERFORMANCE ===
+                // Minimal center glow
+                float centerGlow = exp(-dist * 1.5) * 0.4;
                 color.rgb += centerGlow * beamColor.rgb;
                 
-                // Create infinite tunnel effect - brighten the very center
-                float infiniteCenter = exp(-dist * 8.0) * 1.5;
-                color.rgb += infiniteCenter * float3(1.0, 1.0, 1.0);
+                // Simple center core
+                float centerCore = exp(-dist * 4.0) * 0.8;
+                color.rgb += centerCore * float3(1.0, 1.0, 1.0);
                 
-                // === INFINITE VOID EFFECT ===
-                // Instead of darkening edges, create infinite depth illusion
-                float tunnelDepth = 1.0 - smoothstep(0.0, 0.8, dist);
-                
-                // Brighten center area to create "light at end of tunnel" effect
-                float voidGlow = pow(tunnelDepth, 3.0) * 0.5;
-                color.rgb += voidGlow * float3(0.8, 0.9, 1.0);
-                
-                // Fade to pure void at the very center
-                float voidFade = smoothstep(0.0, 0.1, dist);
-                color.rgb *= voidFade + (1.0 - voidFade) * 2.0; // Brighten center instead of darken
+                // Minimal tunnel depth
+                float tunnelDepth = 1.0 - smoothstep(0.0, 0.5, dist);
+                float tunnelGlow = tunnelDepth * 0.2;
+                color.rgb += tunnelGlow * float3(0.8, 0.9, 1.0);
                 
                 return color;
             }
