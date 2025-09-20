@@ -8860,8 +8860,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 45.000
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
-  m_sharedMaterial: {fileID: 2140474, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: e34c4421b4b761d4fbbe6209ffcf40fb, type: 2}
+  m_sharedMaterial: {fileID: -8030228404752463906, guid: e34c4421b4b761d4fbbe6209ffcf40fb, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -11893,7 +11893,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 8a2b9e2a607dd2143b58c44bc32410b4, type: 3}
+    m_Font: {fileID: 12800000, guid: 7179f95fc260ef943b7b4957347b085d, type: 3}
     m_FontSize: 120
     m_FontStyle: 0
     m_BestFit: 0
@@ -11905,7 +11905,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Emergency WARP stop
+  m_Text: 'PRESS TO
+
+    EMERGENCY WARP STOP'
 --- !u!222 &2071150920
 CanvasRenderer:
   m_ObjectHideFlags: 0
