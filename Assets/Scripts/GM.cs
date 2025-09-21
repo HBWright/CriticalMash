@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class GameManager : MonoBehaviour
     public Button startButton;
     public GameObject buttonToHide;
     public GameObject starShips;
+    public GameObject warpShader;
     public TextMeshProUGUI timerText;
 
     [Header("Timer Settings")]
@@ -16,6 +18,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Sound Effects")]
     public AudioSource pregame;
+    public AudioSource warpEnd;
     public AudioSource chargingSound;
     public AudioSource explosionSound;
 
@@ -98,10 +101,22 @@ public class GameManager : MonoBehaviour
 
     private void OnStartButtonClicked()
     {
+        StartCoroutine(StartSequence());
+    }
+
+    private IEnumerator StartSequence()
+    {
         if (buttonToHide != null)
             buttonToHide.SetActive(false);
 
         pregame.Stop();
+        warpEnd.Play();
+
+        
+        yield return new WaitWhile(() => warpEnd.isPlaying);
+
+        
+        warpShader.SetActive(false);
         timerRunning = true;
         timerEnded = false;
         playedCharging = false;
@@ -111,11 +126,10 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Time finished");
 
-        // Play explosion sound
         if (explosionSound != null)
             explosionSound.Play();
 
-        // TODO: Trigger explosion animation here
+        // Trigger explosion animation here
     }
 
     private void OnTimerReached50()

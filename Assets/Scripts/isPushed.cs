@@ -5,6 +5,9 @@ using UnityEngine.Events;
 
 public class PhysicsButton : MonoBehaviour
 {
+    [Header("Button Settings")]
+    public int buttonID;   
+
     public Rigidbody buttonTopRigid;
     public Transform buttonTop;
     public Transform buttonLowerLimit;
@@ -19,8 +22,7 @@ public class PhysicsButton : MonoBehaviour
     public UnityEvent onPressed;
     public UnityEvent onReleased;
 
-
-void Start()
+    void Start()
     {
         Collider localCollider = GetComponent<Collider>();
         if (localCollider != null)
@@ -43,47 +45,49 @@ void Start()
             upperLowerDiff = buttonUpperLimit.position.y - buttonLowerLimit.position.y;
     }
 
-    // Update is called once per frame
     void Update()
     {
         buttonTop.transform.localPosition = new Vector3(0, buttonTop.transform.localPosition.y, 0);
         buttonTop.transform.localEulerAngles = new Vector3(0, 0, 0);
+
         if (buttonTop.localPosition.y >= 0)
-            buttonTop.transform.position = new Vector3(buttonUpperLimit.position.x, buttonUpperLimit.position.y, buttonUpperLimit.position.z);
+            buttonTop.transform.position = buttonUpperLimit.position;
         else
             buttonTopRigid.AddForce(buttonTop.transform.up * force * Time.deltaTime);
 
         if (buttonTop.localPosition.y <= buttonLowerLimit.localPosition.y)
-            buttonTop.transform.position = new Vector3(buttonLowerLimit.position.x, buttonLowerLimit.position.y, buttonLowerLimit.position.z);
-
+            buttonTop.transform.position = buttonLowerLimit.position;
 
         if (Vector3.Distance(buttonTop.position, buttonLowerLimit.position) < upperLowerDiff * threshHold)
             isPressed = true;
         else
             isPressed = false;
 
-        if(isPressed && prevPressedState != isPressed)
+        if (isPressed && prevPressedState != isPressed)
             Pressed();
-        if(!isPressed && prevPressedState != isPressed)
+        if (!isPressed && prevPressedState != isPressed)
             Released();
     }
 
-    // void FixedUpdate(){
-    //     Vector3 localVelocity = transform.InverseTransformDirection(buttonTop.GetComponent<Rigidbody>().velocity);
-    //     Rigidbody rb = buttonTop.GetComponent<Rigidbody>();
-    //     localVelocity.x = 0;
-    //     localVelocity.z = 0;
-    //     rb.velocity = transform.TransformDirection(localVelocity);
-    // }
-
-    void Pressed(){
+    void Pressed()
+    {
         prevPressedState = isPressed;
-        pressedSound.pitch = 1;
-        pressedSound.Play();
+        if (pressedSound != null)
+        {
+            pressedSound.pitch = 1;
+            pressedSound.Play();
+        }
+
+        // Find the ButtonManager and register press
+        ButtonManager manager = FindObjectOfType<ButtonManager>();
+        if (manager != null)
+            manager.RegisterButtonPress(buttonID);
+
         onPressed.Invoke();
     }
 
-    void Released(){
+    void Released()
+    {
         prevPressedState = isPressed;
         onReleased.Invoke();
     }
