@@ -15,13 +15,12 @@ public class PhysicsButton : MonoBehaviour
     public bool isPressed;
     private bool prevPressedState;
     public AudioSource pressedSound;
-    public AudioSource releasedSound;
     public Collider[] CollidersToIgnore;
     public UnityEvent onPressed;
     public UnityEvent onReleased;
 
-    // Start is called before the first frame update
-    void Start()
+
+void Start()
     {
         Collider localCollider = GetComponent<Collider>();
         if (localCollider != null)
@@ -69,6 +68,14 @@ public class PhysicsButton : MonoBehaviour
             Released();
     }
 
+    // void FixedUpdate(){
+    //     Vector3 localVelocity = transform.InverseTransformDirection(buttonTop.GetComponent<Rigidbody>().velocity);
+    //     Rigidbody rb = buttonTop.GetComponent<Rigidbody>();
+    //     localVelocity.x = 0;
+    //     localVelocity.z = 0;
+    //     rb.velocity = transform.TransformDirection(localVelocity);
+    // }
+
     void Pressed(){
         prevPressedState = isPressed;
         pressedSound.pitch = 1;
@@ -78,8 +85,6 @@ public class PhysicsButton : MonoBehaviour
 
     void Released(){
         prevPressedState = isPressed;
-        releasedSound.pitch = Random.Range(1.1f, 1.2f);
-        releasedSound.Play();
         onReleased.Invoke();
     }
 }

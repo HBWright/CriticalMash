@@ -14,8 +14,16 @@ public class GameManager : MonoBehaviour
     public float timeRemaining = 60f;
     public bool countDown = true;
 
+    [Header("Sound Effects")]
+    public AudioSource chargingSound;
+    public AudioSource explosionSound;
+
     private bool timerRunning = false;
     private bool timerEnded = false;
+
+    private bool reached50 = false;
+    private bool reached46 = false;
+    private bool playedCharging = false;
 
     void Start()
     {
@@ -26,10 +34,6 @@ public class GameManager : MonoBehaviour
             timerText.text = "";
     }
 
-    private bool reached50 = false;
-    private bool reached46 = false;
-
-
     void Update()
     {
         if (!timerRunning) return;
@@ -38,17 +42,25 @@ public class GameManager : MonoBehaviour
         {
             timeRemaining -= Time.deltaTime;
 
-            // Trigger once when timer first reaches 46 or below
+            // Trigger once when timer first reaches 50 or below
             if (!reached50 && timeRemaining <= 50f)
             {
                 reached50 = true;
                 OnTimerReached50();
             }
 
+            // Trigger once when timer first reaches 46 or below
             if (!reached46 && timeRemaining <= 46f)
             {
                 reached46 = true;
                 OnTimerReached46();
+            }
+
+            // Trigger charging sound once at 19 seconds
+            if (!playedCharging && timeRemaining <= 19f)
+            {
+                playedCharging = true;
+                PlayChargingSound();
             }
 
             if (reached46)
@@ -75,13 +87,13 @@ public class GameManager : MonoBehaviour
     }
 
     private void UpdateTimerText()
-{
-    int seconds = Mathf.FloorToInt(timeRemaining);
-    int milliseconds = Mathf.FloorToInt((timeRemaining - seconds) * 1000);
+    {
+        int seconds = Mathf.FloorToInt(timeRemaining);
+        int milliseconds = Mathf.FloorToInt((timeRemaining - seconds) * 1000);
 
-    if (timerText != null)
-        timerText.text = $"{seconds:00}.{milliseconds:000}";
-}
+        if (timerText != null)
+            timerText.text = $"{seconds:00}.{milliseconds:000}";
+    }
 
     private void OnStartButtonClicked()
     {
@@ -90,17 +102,24 @@ public class GameManager : MonoBehaviour
 
         timerRunning = true;
         timerEnded = false;
+        playedCharging = false;
     }
 
     private void OnTimerEnd()
     {
         Debug.Log("Time finished");
-        // I'll put an explosion animation here
+
+        // Play explosion sound
+        if (explosionSound != null)
+            explosionSound.Play();
+
+        // TODO: Trigger explosion animation here
     }
 
     private void OnTimerReached50()
     {
-        starShips.SetActive(true);
+        if (starShips != null)
+            starShips.SetActive(true);
     }
 
     private void OnTimerReached46()
@@ -111,6 +130,13 @@ public class GameManager : MonoBehaviour
         if (timerText != null)
             timerText.text = $"{seconds:00}.{milliseconds:000}";
 
-        starShips.SetActive(true);
+        if (starShips != null)
+            starShips.SetActive(true);
+    }
+
+    private void PlayChargingSound()
+    {
+        if (chargingSound != null)
+            chargingSound.Play();
     }
 }
