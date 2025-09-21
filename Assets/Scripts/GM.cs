@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public bool countDown = true;
 
     [Header("Sound Effects")]
+    public AudioSource pregame;
     public AudioSource chargingSound;
     public AudioSource explosionSound;
 
@@ -100,6 +101,7 @@ public class GameManager : MonoBehaviour
         if (buttonToHide != null)
             buttonToHide.SetActive(false);
 
+        pregame.Stop();
         timerRunning = true;
         timerEnded = false;
         playedCharging = false;
