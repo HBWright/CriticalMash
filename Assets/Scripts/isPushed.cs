@@ -81,7 +81,7 @@ public class PhysicsButton : MonoBehaviour
         // Find the ButtonManager and register press
         ButtonManager manager = FindObjectOfType<ButtonManager>();
         if (manager != null)
-            manager.RegisterButtonPress(buttonID);
+            manager.CheckPress(buttonID);
 
         onPressed.Invoke();
     }

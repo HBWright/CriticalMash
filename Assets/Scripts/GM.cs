@@ -2,14 +2,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
+using UnityEngine.SceneManagement; // <--- Needed for scene reload
 
 public class GameManager : MonoBehaviour
 {
     [Header("UI Elements")]
     public Button startButton;
+    public Button restartButton; // <-- assign in inspector
     public GameObject buttonToHide;
     public GameObject starShips;
     public GameObject warpShader;
+    public GameObject Environment;
+    public GameObject GameOver;
     public TextMeshProUGUI timerText;
 
     [Header("Timer Settings")]
@@ -34,6 +38,9 @@ public class GameManager : MonoBehaviour
         if (startButton != null)
             startButton.onClick.AddListener(OnStartButtonClicked);
 
+        if (restartButton != null)
+            restartButton.onClick.AddListener(OnRestartButtonClicked);
+
         if (timerText != null)
             timerText.text = "";
     }
@@ -46,21 +53,18 @@ public class GameManager : MonoBehaviour
         {
             timeRemaining -= Time.deltaTime;
 
-            // Trigger once when timer first reaches 50 or below
             if (!reached50 && timeRemaining <= 50f)
             {
                 reached50 = true;
                 OnTimerReached50();
             }
 
-            // Trigger once when timer first reaches 46 or below
             if (!reached46 && timeRemaining <= 46f)
             {
                 reached46 = true;
                 OnTimerReached46();
             }
 
-            // Trigger charging sound once at 19 seconds
             if (!playedCharging && timeRemaining <= 19f)
             {
                 playedCharging = true;
@@ -68,9 +72,7 @@ public class GameManager : MonoBehaviour
             }
 
             if (reached46)
-            {
                 UpdateTimerText();
-            }
 
             if (timeRemaining <= 0)
             {
@@ -82,6 +84,12 @@ public class GameManager : MonoBehaviour
                     timerEnded = true;
                     OnTimerEnd();
                 }
+
+                GameOver.SetActive(true);
+                Environment.SetActive(false);
+
+                if (restartButton != null)
+                    restartButton.gameObject.SetActive(true);
             }
         }
         else
@@ -97,6 +105,9 @@ public class GameManager : MonoBehaviour
 
         if (timerText != null)
             timerText.text = $"{seconds:00}.{milliseconds:000}";
+
+        if (timeRemaining <= 10f)
+            timerText.color = Color.red;
     }
 
     private void OnStartButtonClicked()
@@ -112,14 +123,17 @@ public class GameManager : MonoBehaviour
         pregame.Stop();
         warpEnd.Play();
 
-        
         yield return new WaitWhile(() => warpEnd.isPlaying);
 
-        
         warpShader.SetActive(false);
         timerRunning = true;
         timerEnded = false;
         playedCharging = false;
+    }
+
+    private void OnRestartButtonClicked()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void OnTimerEnd()
@@ -128,8 +142,6 @@ public class GameManager : MonoBehaviour
 
         if (explosionSound != null)
             explosionSound.Play();
-
-        // Trigger explosion animation here
     }
 
     private void OnTimerReached50()
@@ -146,13 +158,33 @@ public class GameManager : MonoBehaviour
         if (timerText != null)
             timerText.text = $"{seconds:00}.{milliseconds:000}";
 
-        if (starShips != null)
-            starShips.SetActive(true);
+        FindObjectOfType<ButtonManager>().isActive = true;
     }
 
     private void PlayChargingSound()
     {
         if (chargingSound != null)
             chargingSound.Play();
+    }
+
+    public void GameWon()
+    {
+        Debug.Log("WIN");
+
+        // Example actions:
+        timerRunning = false;
+        starShips.SetActive(false);
+
+        StartCoroutine(VictoryLap());
+    }
+
+    private IEnumerator VictoryLap()
+    {
+        //PutVictory Dialog Here
+        //victory.Play();
+        //yield return new WaitWhile(() => victory.isPlaying);
+        warpEnd.Play();
+        yield return new WaitWhile(() => warpEnd.isPlaying);
+        warpShader.SetActive(true);
     }
 }
