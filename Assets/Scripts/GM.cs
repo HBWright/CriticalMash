@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     public GameObject warpShader;
     public GameObject Environment;
     public GameObject GameOver;
+    public GameObject Credits;
     public TextMeshProUGUI timerText;
 
     [Header("Timer Settings")]
@@ -186,5 +187,7 @@ public class GameManager : MonoBehaviour
         warpEnd.Play();
         yield return new WaitWhile(() => warpEnd.isPlaying);
         warpShader.SetActive(true);
+
+        Credits.SetActive(true);
     }
 }
