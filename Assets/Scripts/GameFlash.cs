@@ -7,11 +7,13 @@ public class GameOverScript : MonoBehaviour
 {
     [SerializeField]
     private Image image;
+    [SerializeField]
+    private float FadeTime = 3f;
    
     
     void Start()
     {
-        StartCoroutine(FadeOut(image, 3f));
+        StartCoroutine(FadeOut(image, FadeTime));
     }
 
     // Update is called once per frame
@@ -30,7 +32,7 @@ public class GameOverScript : MonoBehaviour
         float timer = 0;
         while (timer < timetoFade) {
             timer += Time.deltaTime;
-            image.color = Color.Lerp(startColor, endColor, timer);
+            image.color = Color.Lerp(startColor, endColor, timer / timetoFade);
             yield return null;
 
 
