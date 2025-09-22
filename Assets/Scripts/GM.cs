@@ -8,13 +8,15 @@ public class GameManager : MonoBehaviour
 {
     [Header("UI Elements")]
     public Button startButton;
-    public Button restartButton; // <-- assign in inspector
+    public Button restartButton; 
     public GameObject buttonToHide;
     public GameObject starShips;
     public GameObject warpShader;
     public GameObject Environment;
     public GameObject GameOver;
+    public GameObject GameWinFlash;
     public GameObject Credits;
+    public GameObject Manual;
     public TextMeshProUGUI timerText;
 
     [Header("Timer Settings")]
@@ -26,6 +28,7 @@ public class GameManager : MonoBehaviour
     public AudioSource warpEnd;
     public AudioSource chargingSound;
     public AudioSource explosionSound;
+    public AudioSource creditsSong;
 
     private bool timerRunning = false;
     private bool timerEnded = false;
@@ -160,6 +163,8 @@ public class GameManager : MonoBehaviour
             timerText.text = $"{seconds:00}.{milliseconds:000}";
 
         FindObjectOfType<ButtonManager>().isActive = true;
+
+        Manual.SetActive(true);
     }
 
     private void PlayChargingSound()
@@ -173,6 +178,8 @@ public class GameManager : MonoBehaviour
         Debug.Log("WIN");
 
         // Example actions:
+        GameWinFlash.SetActive(true);
+        Manual.SetActive(false);
         timerRunning = false;
         starShips.SetActive(false);
 
@@ -184,6 +191,7 @@ public class GameManager : MonoBehaviour
         //PutVictory Dialog Here
         //victory.Play();
         //yield return new WaitWhile(() => victory.isPlaying);
+        creditsSong.Play();
         warpEnd.Play();
         yield return new WaitWhile(() => warpEnd.isPlaying);
         warpShader.SetActive(true);
