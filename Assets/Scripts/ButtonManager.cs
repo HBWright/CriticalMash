@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Collections;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -24,6 +26,8 @@ public class ButtonManager : MonoBehaviour
     public bool sequence2 = false;
     public bool sequence3 = false;
     public bool isActive = false; // if false, you can't attempt to match the sequence
+    public GameObject checkOBJ;
+    public AudioSource ding;
     private GameManager gm;
 
     private void Awake()
@@ -89,6 +93,8 @@ public class ButtonManager : MonoBehaviour
         {
             Debug.Log($"Matched sequence {currentSequenceIndex + 1}!");
 
+            StartCoroutine(Checkmark());
+
             switch (currentSequenceIndex)
             {
                 case 0: sequence1 = true; break;
@@ -110,5 +116,13 @@ public class ButtonManager : MonoBehaviour
     public int[] GetSequence()
     {
         return buttonQueue.ToArray();
+    }
+
+    private IEnumerator Checkmark()
+    {
+        checkOBJ.SetActive(true);
+        ding.Play();
+        yield return new WaitWhile(() => ding.isPlaying);
+        checkOBJ.SetActive(false);
     }
 }
