@@ -72,6 +72,8 @@ public class ButtonManager : MonoBehaviour
 
     public void CheckPress(int buttonID)
     {
+        if (!isActive) return;
+        
         buttonQueue.Enqueue(buttonID);
 
         if (buttonQueue.Count > maxSize)
