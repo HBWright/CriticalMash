@@ -2,7 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
-using UnityEngine.SceneManagement; // <--- Needed for scene reload
+using UnityEngine.SceneManagement;
+using System.Xml;
+using System.ComponentModel;
+using Unity.Collections; // <--- Needed for scene reload
 
 public class GameManager : MonoBehaviour
 {
@@ -31,12 +34,30 @@ public class GameManager : MonoBehaviour
     public AudioSource explosionSound;
     public AudioSource creditsSong;
 
+    [Header("Voice Lines")]
+
+    public AudioSource DT1_L1;
+    public AudioSource CPT_L1;
+    public AudioSource DT1_L2;
+    public AudioSource DT2_L1;
+    public AudioSource CPT_L2;
+    public AudioSource DT2_L2;
+    public AudioSource CPT_L3;
+    public AudioSource DT2_L3;
+    public AudioSource CPT_L4;
+    public AudioSource DT3_L1;
+    public AudioSource CPT_L5;
+    public AudioSource CPT_WIN;
+    
+
+
     private bool timerRunning = false;
     private bool timerEnded = false;
 
     private bool reached50 = false;
     private bool reached46 = false;
     private bool playedCharging = false;
+    private bool lose = false;
 
     void Start()
     {
@@ -81,6 +102,8 @@ public class GameManager : MonoBehaviour
 
             if (timeRemaining <= 0)
             {
+                lose = true;
+
                 timeRemaining = 0;
                 timerRunning = false;
 
@@ -119,6 +142,32 @@ public class GameManager : MonoBehaviour
     private void OnStartButtonClicked()
     {
         StartCoroutine(StartSequence());
+        StartCoroutine(VAIntro());
+    }
+
+    private IEnumerator VAIntro()
+    {
+        DT1_L1.Play();
+        yield return new WaitWhile(() => DT1_L1.isPlaying);
+        CPT_L1.Play();
+        yield return new WaitWhile(() => CPT_L1.isPlaying);
+        DT1_L2.Play();
+        yield return new WaitWhile(() => DT1_L2.isPlaying);
+        DT2_L1.Play();
+        yield return new WaitWhile(() => DT2_L1.isPlaying);
+        CPT_L2.Play();
+        yield return new WaitWhile(() => CPT_L2.isPlaying);
+        DT2_L2.Play();
+        yield return new WaitWhile(() => DT2_L2.isPlaying);
+        CPT_L3.Play();
+        yield return new WaitWhile(() => CPT_L3.isPlaying);
+        DT2_L3.Play();
+        yield return new WaitWhile(() => DT2_L3.isPlaying);
+        CPT_L4.Play();
+        yield return new WaitWhile(() => CPT_L4.isPlaying);
+        DT3_L1.Play();
+        yield return new WaitWhile(() => DT3_L1.isPlaying);
+        CPT_L5.Play();
     }
 
     private IEnumerator StartSequence()
@@ -178,26 +227,31 @@ public class GameManager : MonoBehaviour
     public void GameWon()
     {
         Debug.Log("WIN");
-
-        // Example actions:
-        GameWinFlash.SetActive(true);
-        Manual.SetActive(false);
-        timerRunning = false;
-        starShips.SetActive(false);
-
+        chargingSound.Stop();
         StartCoroutine(VictoryLap());
     }
 
     private IEnumerator VictoryLap()
     {
-        //PutVictory Dialog Here
-        //victory.Play();
-        //yield return new WaitWhile(() => victory.isPlaying);
-        creditsSong.Play();
-        warpEnd.Play();
-        yield return new WaitWhile(() => warpEnd.isPlaying);
-        warpShader.SetActive(true);
 
-        Credits.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        if (lose == false)
+        {
+            GameWinFlash.SetActive(true);
+            Manual.SetActive(false);
+            timerRunning = false;
+            starShips.SetActive(false);
+
+            yield return new WaitForSeconds(5f);
+            CPT_WIN.Play();
+            yield return new WaitForSeconds(5f);
+            creditsSong.Play();
+            yield return new WaitWhile(() => CPT_WIN.isPlaying);
+            warpEnd.Play();
+            yield return new WaitWhile(() => warpEnd.isPlaying);
+            warpShader.SetActive(true);
+
+            Credits.SetActive(true);
+        }
     }
 }

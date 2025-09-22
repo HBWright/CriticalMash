@@ -5,6 +5,8 @@ using System.Collections;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Diagnostics;
+using System.Xml;
 
 public class ButtonManager : MonoBehaviour
 {
@@ -29,6 +31,13 @@ public class ButtonManager : MonoBehaviour
     public GameObject checkOBJ;
     public AudioSource ding;
     private GameManager gm;
+
+    [Header("Voice Lines")]
+    public AudioSource DT2_L4;
+    public AudioSource DT3_L2;
+    public AudioSource DT1_L3;
+    public AudioSource CPT_L7;
+    public AudioSource DT3_L3;
 
     private void Awake()
     {
@@ -65,21 +74,18 @@ public class ButtonManager : MonoBehaviour
         if (buttonQueue.Count > maxSize)
             buttonQueue.Dequeue();
 
-        Debug.Log("Current sequence: " + string.Join(", ", buttonQueue));
-
         CheckSequence();
     }
 
     public void CheckPress(int buttonID)
     {
         if (!isActive) return;
-        
+
         buttonQueue.Enqueue(buttonID);
 
         if (buttonQueue.Count > maxSize)
             buttonQueue.Dequeue();
 
-        Debug.Log("Current sequence: " + string.Join(", ", buttonQueue));
 
         CheckSequence();
     }
@@ -93,7 +99,6 @@ public class ButtonManager : MonoBehaviour
         // Compares current target sequence
         if (currentQueue.SequenceEqual(sequences[currentSequenceIndex]))
         {
-            Debug.Log($"Matched sequence {currentSequenceIndex + 1}!");
 
             StartCoroutine(Checkmark());
 
@@ -104,12 +109,18 @@ public class ButtonManager : MonoBehaviour
                 case 2: sequence3 = true; break;
             }
 
+            switch (currentSequenceIndex)
+            {
+                case 0: StartCoroutine(SuccessVA1()); break;
+                case 1: StartCoroutine(SuccessVA2()); break;
+            }
+
             // Advance to next sequence
             if (currentSequenceIndex < sequences.Length - 1)
                 currentSequenceIndex++;
             else
             {
-                Debug.Log("All sequences matched!");
+                DT3_L3.Play();
                 gm.GameWon();
             }
         }
@@ -126,5 +137,18 @@ public class ButtonManager : MonoBehaviour
         ding.Play();
         yield return new WaitWhile(() => ding.isPlaying);
         checkOBJ.SetActive(false);
+    }
+
+    private IEnumerator SuccessVA1()
+    {
+        DT2_L4.Play();
+        yield return new WaitWhile(() => DT2_L4.isPlaying);
+        DT3_L2.Play();
+    }
+    private IEnumerator SuccessVA2()
+    {
+        DT1_L3.Play();
+        yield return new WaitWhile(() => DT1_L3.isPlaying);
+        CPT_L7.Play();
     }
 }
