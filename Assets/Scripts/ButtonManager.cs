@@ -120,6 +120,7 @@ public class ButtonManager : MonoBehaviour
                 currentSequenceIndex++;
             else
             {
+                isActive = false;
                 DT3_L3.Play();
                 gm.GameWon();
             }
