@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     public GameObject warpShader;
     public GameObject Environment;
     public GameObject GameOver;
+    public GameObject GameOverFlash;
     public GameObject GameWinFlash;
     public GameObject Credits;
     public GameObject Manual;
@@ -89,6 +90,7 @@ public class GameManager : MonoBehaviour
                     OnTimerEnd();
                 }
 
+                GameOverFlash.SetActive(true);
                 GameOver.SetActive(true);
                 Environment.SetActive(false);
 

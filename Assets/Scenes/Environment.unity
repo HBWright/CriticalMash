@@ -10857,6 +10857,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   image: {fileID: 249504675}
+  FadeTime: 3
 --- !u!114 &249504675
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -78131,6 +78132,7 @@ MonoBehaviour:
   warpShader: {fileID: 1049994201}
   Environment: {fileID: 2069172902}
   GameOver: {fileID: 508015364}
+  GameOverFlash: {fileID: 1826747102}
   GameWinFlash: {fileID: 2000107006}
   Credits: {fileID: 253350710}
   Manual: {fileID: 645591749}
@@ -84441,6 +84443,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   image: {fileID: 1526462151}
+  FadeTime: 3
 --- !u!1 &1529863062
 GameObject:
   m_ObjectHideFlags: 0
